@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Sparkles, X, Send, ChevronDown, MessageSquare } from 'lucide-react';
+import { X, Send, ChevronDown, MessageSquareText, Shield, Sparkles, HelpCircle } from 'lucide-react';
 import { heeraService } from '@/services/heeraService';
 
 export function HeeraChat() {
@@ -8,19 +8,18 @@ export function HeeraChat() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState<{ role: 'user' | 'heera'; text: string; }[]>([
-    { role: 'heera', text: 'I am Heera, your care ecosystem assistant. What can I help you with?' }
+    { role: 'heera', text: 'Welcome to CareWell Concierge. I can help you find specialists, organize home nursing, or check upcoming appointments. How may I assist you today?' }
   ]);
   const navigate = useNavigate();
   const location = useLocation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const suggestedPrompts = [
-    "Find a nurse for my father",
-    "Show my father's upcoming care",
-    "Summarize my recent reports",
-    "Find a cardiologist",
-    "Prepare medicines from my prescription",
-    "When is my next appointment?"
+    "Find a verified cardiologist",
+    "Arrange home care for my father",
+    "Summarize recent diagnostic reports",
+    "Request prescription medicine refill",
+    "When is our next scheduled visit?"
   ];
 
   const handleProcess = async (text: string) => {
@@ -31,9 +30,7 @@ export function HeeraChat() {
     setIsProcessing(true);
 
     try {
-      // Mocking network delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      await new Promise(resolve => setTimeout(resolve, 600));
       const response = await heeraService.process({ query: text });
       
       setMessages(prev => [...prev, { role: 'heera', text: response.text }]);
@@ -42,10 +39,10 @@ export function HeeraChat() {
         setTimeout(() => {
           setIsOpen(false);
           navigate(response.action!.payload);
-        }, 1500);
+        }, 1200);
       }
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'heera', text: 'Sorry, I encountered an error processing your request.' }]);
+    } catch {
+      setMessages(prev => [...prev, { role: 'heera', text: 'Our care coordination service is currently synchronizing. Please try again shortly or contact support.' }]);
     } finally {
       setIsProcessing(false);
     }
@@ -57,58 +54,66 @@ export function HeeraChat() {
     }
   }, [messages, isProcessing, isOpen]);
 
-  // Close chat when location changes manually
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
 
   return (
     <>
-      {/* Floating Entry Point */}
-      <div className="fixed bottom-24 lg:bottom-8 right-4 lg:right-8 z-50">
+      {/* Discreet Care Concierge Anchor */}
+      <div className="fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-40">
         {!isOpen && (
           <button
             onClick={() => setIsOpen(true)}
-            className="group flex h-14 items-center justify-center gap-2 rounded-full bg-primary-600 px-5 text-white shadow-lg shadow-primary-600/30 transition-transform hover:scale-105 active:scale-95"
-            aria-label="Ask Heera"
+            className="group flex items-center gap-2.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white px-4 py-2.5 shadow-lg shadow-neutral-900/15 border border-neutral-700/40 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+            aria-label="Open Care Concierge"
           >
-            <Sparkles size={20} className="group-hover:animate-pulse" />
-            <span className="font-bold">Ask Heera</span>
+            <div className="relative flex items-center justify-center">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
+            <MessageSquareText size={17} className="text-neutral-300 group-hover:text-white transition-colors" />
+            <span className="text-xs font-semibold tracking-tight">Care Concierge</span>
           </button>
         )}
       </div>
 
-      {/* Chat Window */}
+      {/* Concierge Window */}
       {isOpen && (
-        <div className="fixed inset-x-0 bottom-0 z-50 mx-auto flex h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl lg:bottom-4 lg:right-4 lg:h-[600px] lg:rounded-3xl lg:mx-0">
+        <div className="fixed inset-x-0 bottom-0 z-50 mx-auto flex h-[82vh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl lg:bottom-6 lg:right-6 lg:h-[580px] lg:rounded-2xl lg:mx-0 border border-neutral-200/80 animate-in fade-in slide-in-from-bottom-4 duration-200">
           
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-neutral-100 bg-white p-4">
+          <div className="flex items-center justify-between border-b border-neutral-100 bg-white px-4 py-3.5">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
-                <Sparkles size={20} />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-50 text-primary-800 border border-primary-200/50">
+                <MessageSquareText size={18} />
               </div>
               <div>
-                <h3 className="font-bold text-neutral-800">Heera AI</h3>
-                <p className="text-xs text-neutral-500">Assistant & Navigator</p>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-sm font-bold text-neutral-900 tracking-tight">Care Concierge</h3>
+                  <span className="rounded-full bg-emerald-50 px-1.5 py-0.2 text-[9px] font-semibold text-emerald-700 border border-emerald-200/60">
+                    Online
+                  </span>
+                </div>
+                <p className="text-[11px] text-neutral-500">Care navigation & appointment support</p>
               </div>
             </div>
             <button 
               onClick={() => setIsOpen(false)}
-              className="rounded-full p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
+              className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors"
+              aria-label="Close"
             >
-              <ChevronDown size={20} />
+              <ChevronDown size={18} />
             </button>
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-50/50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-neutral-50/40">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
+                <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed ${
                   msg.role === 'user' 
-                    ? 'bg-primary-600 text-white rounded-tr-sm' 
-                    : 'bg-white border border-neutral-100 text-neutral-700 rounded-tl-sm'
+                    ? 'bg-neutral-900 text-white rounded-br-xs shadow-xs' 
+                    : 'bg-white border border-neutral-200/70 text-neutral-800 rounded-bl-xs shadow-subtle'
                 }`}>
                   {msg.text}
                 </div>
@@ -116,12 +121,10 @@ export function HeeraChat() {
             ))}
             {isProcessing && (
               <div className="flex justify-start">
-                <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white border border-neutral-100 px-4 py-3 shadow-sm flex items-center gap-2">
-                  <div className="flex gap-1">
-                    <span className="h-2 w-2 rounded-full bg-primary-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="h-2 w-2 rounded-full bg-primary-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="h-2 w-2 rounded-full bg-primary-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
+                <div className="max-w-[85%] rounded-2xl rounded-bl-xs bg-white border border-neutral-200/70 px-4 py-3 shadow-subtle flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary-600 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary-600 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary-600 animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             )}
@@ -129,17 +132,16 @@ export function HeeraChat() {
           </div>
 
           {/* Suggestions & Input */}
-          <div className="border-t border-neutral-100 bg-white p-4">
-            
+          <div className="border-t border-neutral-100 bg-white p-3.5 space-y-3">
             {messages.length === 1 && (
-              <div className="mb-4">
-                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-neutral-400">Suggested</p>
-                <div className="flex flex-wrap gap-2">
+              <div>
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-neutral-400">Common Requests</p>
+                <div className="flex flex-wrap gap-1.5">
                   {suggestedPrompts.map((prompt) => (
                     <button
                       key={prompt}
                       onClick={() => handleProcess(prompt)}
-                      className="rounded-xl border border-primary-100 bg-primary-50 px-3 py-2 text-left text-xs font-medium text-primary-700 transition-colors hover:bg-primary-100"
+                      className="rounded-lg border border-neutral-200/80 bg-neutral-50 px-2.5 py-1.5 text-left text-[11px] font-medium text-neutral-700 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
                     >
                       {prompt}
                     </button>
@@ -156,20 +158,21 @@ export function HeeraChat() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ask Heera anything..."
-                className="w-full rounded-2xl border-none bg-neutral-100 py-3 pl-4 pr-12 text-sm text-neutral-800 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="Ask about care plans, doctors, tests..."
+                className="w-full rounded-xl border border-neutral-200 bg-neutral-50/70 py-2.5 pl-3.5 pr-11 text-xs sm:text-sm text-neutral-900 placeholder-neutral-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-600/30 focus:border-primary-600 transition-all"
               />
               <button
                 type="submit"
                 disabled={!query.trim() || isProcessing}
-                className="absolute right-2 flex h-8 w-8 items-center justify-center rounded-xl bg-primary-600 text-white transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                className="absolute right-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-neutral-900 text-white transition-opacity disabled:opacity-30 hover:bg-neutral-800"
               >
-                <Send size={14} />
+                <Send size={13} />
               </button>
             </form>
-            <p className="mt-3 text-center text-[10px] text-neutral-400">
-              Heera is an AI assistant and cannot make autonomous clinical decisions or prescribe medicines.
-            </p>
+            <div className="flex items-center justify-center gap-1.5 text-center text-[10px] text-neutral-400">
+              <Shield size={11} className="text-neutral-400" />
+              <span>Automated navigation assistance. In medical emergencies, dial 911 / 112.</span>
+            </div>
           </div>
         </div>
       )}

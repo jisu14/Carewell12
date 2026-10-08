@@ -13,19 +13,25 @@ export function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-neutral-100 bg-white/95 backdrop-blur-md lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-neutral-200/60 bg-white/95 backdrop-blur-md lg:hidden shadow-[0_-4px_16px_rgba(0,0,0,0.03)]">
       <div className="mx-auto flex max-w-md items-center justify-around px-2 py-1.5">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = location.pathname === item.path || (item.path === '/care' && location.pathname.startsWith('/care'));
           const Icon = item.icon;
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center gap-0.5 rounded-xl px-3 py-2 transition-colors ${isActive ? 'text-primary-600' : 'text-neutral-400'}`}
+              className={`relative flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 transition-all duration-200 ${
+                isActive ? 'text-primary-800' : 'text-neutral-400 hover:text-neutral-600'
+              }`}
             >
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`text-[10px] font-medium ${isActive ? 'font-semibold' : ''}`}>{item.label}</span>
+              <div className={`p-1 rounded-xl transition-colors ${isActive ? 'bg-primary-50 text-primary-700' : ''}`}>
+                <Icon size={20} strokeWidth={isActive ? 2.4 : 1.9} />
+              </div>
+              <span className={`text-[10px] tracking-tight ${isActive ? 'font-bold text-primary-800' : 'font-medium'}`}>
+                {item.label}
+              </span>
             </Link>
           );
         })}

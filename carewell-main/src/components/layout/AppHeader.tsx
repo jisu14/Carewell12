@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Bell } from 'lucide-react';
+import { ArrowLeft, Bell, HeartPulse } from 'lucide-react';
 import { dataService } from '@/services/dataService';
 
 interface AppHeaderProps {
@@ -15,26 +15,26 @@ export function AppHeader({ title, showBack, showLogo, rightAction, onBack }: Ap
   const unreadCount = dataService.notifications.getUnreadCount();
 
   return (
-    <header className="sticky top-0 z-20 border-b border-neutral-100 bg-white/95 backdrop-blur-md">
-      <div className="flex items-center justify-between px-4 py-3.5 lg:px-6">
+    <header className="sticky top-0 z-20 border-b border-neutral-200/60 bg-white/95 backdrop-blur-md">
+      <div className="flex items-center justify-between px-4 py-3 lg:px-6">
         <div className="flex items-center gap-3">
           {showBack && (
             <button
               onClick={() => onBack ? onBack() : navigate(-1)}
               className="flex h-9 w-9 items-center justify-center rounded-xl text-neutral-600 transition-colors hover:bg-neutral-100"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={19} />
             </button>
           )}
           {showLogo && (
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-sm font-bold text-white">
-                C
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-600 to-primary-800 text-white shadow-xs">
+                <HeartPulse size={17} className="text-primary-100" />
               </div>
-              <span className="font-bold text-neutral-800 lg:hidden">CareWell</span>
+              <span className="font-bold text-neutral-900 tracking-tight lg:hidden">CareWell</span>
             </div>
           )}
-          {title && <h1 className="text-lg font-semibold text-neutral-800">{title}</h1>}
+          {title && <h1 className="text-base font-bold text-neutral-900 tracking-tight">{title}</h1>}
         </div>
         <div className="flex items-center gap-2">
           {rightAction}

@@ -15,7 +15,7 @@ export function BookingButton({
   fullWidth = false,
   size = 'md',
 }: BookingButtonProps) {
-  const classes = `inline-flex items-center justify-center rounded-xl bg-primary-600 font-semibold text-white transition-all hover:bg-primary-700 active:scale-[0.98] ${size === 'lg' ? 'px-6 py-3.5 text-base' : 'px-5 py-2.5 text-sm'} ${fullWidth ? 'w-full' : ''}`;
+  const classes = `inline-flex items-center justify-center rounded-xl bg-neutral-900 hover:bg-neutral-800 font-semibold text-white shadow-xs transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 border border-neutral-800 ${size === 'lg' ? 'px-6 py-3 text-sm sm:text-base' : 'px-4 py-2.5 text-xs sm:text-sm'} ${fullWidth ? 'w-full' : ''}`;
 
   if (to) {
     return (

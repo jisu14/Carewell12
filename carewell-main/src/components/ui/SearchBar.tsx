@@ -17,7 +17,7 @@ export function SearchBar({
 }: SearchBarProps) {
   return (
     <div className="relative flex items-center">
-      <Search size={20} className="absolute left-4 text-neutral-400 pointer-events-none" />
+      <Search size={18} className="absolute left-4 text-neutral-400 pointer-events-none" />
       <input
         type="text"
         value={value}
@@ -25,14 +25,14 @@ export function SearchBar({
         onKeyDown={(e) => e.key === 'Enter' && onSearch?.()}
         placeholder={placeholder}
         autoFocus={autoFocus}
-        className="w-full rounded-2xl border border-neutral-200 bg-white py-3.5 pl-12 pr-10 text-sm text-neutral-800 placeholder:text-neutral-400 shadow-card transition-all focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100"
+        className="w-full rounded-2xl border border-neutral-200/90 bg-neutral-50/60 py-3 pl-11 pr-10 text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:bg-white focus:border-primary-600/50 focus:outline-none focus:ring-2 focus:ring-primary-600/20"
       />
       {value && (
         <button
           onClick={() => onChange?.('')}
-          className="absolute right-3.5 text-neutral-400 hover:text-neutral-600"
+          className="absolute right-3.5 p-1 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
         >
-          <X size={18} />
+          <X size={16} />
         </button>
       )}
     </div>

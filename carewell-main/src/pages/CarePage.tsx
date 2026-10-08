@@ -69,52 +69,64 @@ export function CarePage() {
   };
 
   return (
-    <div className="pb-20 lg:pb-8 bg-neutral-50 min-h-screen">
-      <AppHeader title="Care Timeline" />
+    <div className="pb-24 lg:pb-12 bg-[#fbfcfb] min-h-screen">
+      <AppHeader title="Care Plan & Timeline" />
       
-      <main className="mx-auto max-w-3xl px-4 py-6 lg:px-8">
+      <main className="mx-auto max-w-3xl px-4 py-6 lg:px-8 space-y-8">
         
-        {/* Patient Header */}
-        <header className="mb-8">
-          <PatientSelector
-            patients={allPatients}
-            selectedId={selectedPatientId}
-            onSelect={setSelectedPatientId}
-            label="Care context"
-          />
-          {selectedPatient && (
-            <div className="mt-4 border-l-2 border-neutral-300 pl-4 text-sm text-neutral-600">
-              <p>{selectedPatient.age} years • {selectedPatient.gender}</p>
-              {selectedPatient.conditions && selectedPatient.conditions.length > 0 && (
-                <p className="mt-1">Conditions: {selectedPatient.conditions.join(', ')}</p>
-              )}
+        {/* Patient Context Card */}
+        <section className="rounded-2xl border border-neutral-200/80 bg-white p-5 sm:p-6 shadow-subtle">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <PatientSelector
+              patients={allPatients}
+              selectedId={selectedPatientId}
+              onSelect={setSelectedPatientId}
+              label="Selected Patient"
+            />
+            {selectedPatient && (
+              <span className="text-xs font-semibold text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-lg self-start sm:self-auto">
+                {selectedPatient.age} yrs • {selectedPatient.gender}
+              </span>
+            )}
+          </div>
+          {selectedPatient?.conditions && selectedPatient.conditions.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-neutral-100 flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mr-1">Tracked Conditions:</span>
+              {selectedPatient.conditions.map((cond) => (
+                <span key={cond} className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-200/60">
+                  {cond}
+                </span>
+              ))}
             </div>
           )}
-        </header>
+        </section>
 
         {/* Timeline */}
-        <section className="mb-12">
+        <section>
           {timelineGroups.length > 0 ? (
-            <div className="space-y-10">
+            <div className="space-y-8">
               {timelineGroups.map((group) => (
-                <div key={group.label}>
-                  <h2 className="mb-4 text-lg font-bold text-neutral-800 border-b border-neutral-200 pb-2">
-                    {group.label}
-                  </h2>
+                <div key={group.label} className="rounded-2xl border border-neutral-200/80 bg-white p-5 sm:p-6 shadow-subtle">
+                  <div className="flex items-center gap-2 mb-5 pb-3 border-b border-neutral-100">
+                    <Calendar size={16} className="text-primary-700" />
+                    <h2 className="text-sm font-bold text-neutral-900 tracking-tight">
+                      {group.label}
+                    </h2>
+                  </div>
                   <div className="space-y-6">
                     {group.items.map((item) => (
                       <div key={item.id} className="flex gap-4 group">
                         <div className="w-16 shrink-0 pt-0.5 text-right">
-                          <span className="text-sm font-semibold text-neutral-800 block">{item.time}</span>
-                          <span className="text-xs text-neutral-500 capitalize mt-1 block">{item.type}</span>
+                          <span className="text-xs font-bold text-neutral-900 block">{item.time}</span>
+                          <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mt-0.5 block">{item.type}</span>
                         </div>
                         <div className="relative pb-6 border-l border-neutral-200 pl-6 group-last:border-transparent group-last:pb-0">
-                          <div className="absolute -left-[1.1rem] top-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-white border border-neutral-200 shadow-sm text-neutral-600">
+                          <div className="absolute -left-[1.05rem] top-0 flex h-7 w-7 items-center justify-center rounded-full bg-white border border-neutral-200 shadow-2xs text-primary-700">
                             {getIconForType(item.type)}
                           </div>
                           <div>
-                            <h3 className="font-bold text-neutral-800">{item.title}</h3>
-                            <p className="text-sm text-neutral-600 mt-1">{item.desc}</p>
+                            <h3 className="text-sm font-bold text-neutral-900">{item.title}</h3>
+                            <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{item.desc}</p>
                           </div>
                         </div>
                       </div>
@@ -124,19 +136,23 @@ export function CarePage() {
               ))}
             </div>
           ) : (
-            <div className="py-12 text-center bg-white rounded-xl border border-neutral-200">
-              <Calendar size={48} className="mx-auto mb-4 text-neutral-200" />
-              <p className="text-sm font-medium text-neutral-500">No scheduled care events</p>
+            <div className="py-12 text-center bg-white rounded-2xl border border-neutral-200/80 p-8 shadow-subtle">
+              <Calendar size={36} className="mx-auto mb-3 text-neutral-300" />
+              <p className="text-sm font-semibold text-neutral-800">No scheduled care events</p>
+              <p className="text-xs text-neutral-400 mt-1">Visits, lab collections and dosages will show here.</p>
             </div>
           )}
         </section>
 
         {/* Current Active Care */}
-        <section className="mb-10">
-          <h2 className="mb-4 text-lg font-bold text-neutral-800 border-b border-neutral-200 pb-2">Current Care</h2>
-          <div className="space-y-4">
+        <section className="rounded-2xl border border-neutral-200/80 bg-white p-5 sm:p-6 shadow-subtle">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-neutral-100">
+            <h2 className="text-sm font-bold text-neutral-900 tracking-tight">Active Ongoing Care</h2>
+            <span className="text-xs font-semibold text-neutral-400">{activeServices.length} Active</span>
+          </div>
+          <div className="divide-y divide-neutral-100">
             {activeServices.length > 0 ? activeServices.map((service) => (
-              <div key={service.id} className="flex items-center justify-between py-3 border-b border-neutral-100 last:border-0">
+              <div key={service.id} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
                 <div>
                   <h3 className="font-bold text-neutral-800">{service.title}</h3>
                   <p className="text-sm text-neutral-500 mt-1">{service.details}</p>

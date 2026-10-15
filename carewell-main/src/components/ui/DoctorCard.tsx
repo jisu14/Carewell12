@@ -34,7 +34,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
           <div className="mt-1.5 flex items-center gap-2">
             <Rating rating={doctor.rating} reviewCount={doctor.reviewCount} />
             <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
-              {doctor.experienceYears}y exp
+              {doctor.experience}y exp
             </span>
           </div>
         </div>

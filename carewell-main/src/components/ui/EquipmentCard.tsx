@@ -1,58 +1,60 @@
 import { Link } from 'react-router-dom';
-import { Package, ShieldCheck } from 'lucide-react';
-import { Rating } from './Rating';
-import { VerificationBadge } from './VerificationBadge';
+import { Package, ShieldCheck, Truck } from 'lucide-react';
 import { AvailabilityBadge } from './AvailabilityBadge';
 import { PriceDisplay } from './PriceDisplay';
 import type { Equipment } from '@/types';
 
 interface EquipmentCardProps {
-  equipment: Equipment;
+  equipment?: Equipment;
+  item?: Equipment;
 }
 
-export function EquipmentCard({ equipment }: EquipmentCardProps) {
+export function EquipmentCard({ equipment, item }: EquipmentCardProps) {
+  const data = equipment || item;
+  if (!data) return null;
+
   return (
     <Link
-      to={`/equipment/${equipment.id}`}
-      className="block rounded-xl border border-neutral-200 bg-white p-4 transition-colors hover:border-primary-400 group"
+      to={`/equipment/${data.id}`}
+      className="group block rounded-2xl border border-neutral-200/80 bg-white p-4 sm:p-5 shadow-subtle transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-card-hover"
     >
-      <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-neutral-50 border border-neutral-100 text-neutral-400 group-hover:bg-primary-50 group-hover:text-primary-600 group-hover:border-primary-100 transition-colors">
-          <Package size={20} />
+      <div className="flex items-start gap-3.5">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-600 group-hover:bg-emerald-50 group-hover:text-emerald-700 transition-colors">
+          <Package size={22} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="truncate font-bold text-neutral-800">{equipment.name}</h3>
-            <VerificationBadge status={equipment.providerVerification} />
+            <h3 className="truncate font-extrabold text-neutral-950 group-hover:text-emerald-900 transition-colors text-sm sm:text-base">
+              {data.name}
+            </h3>
+            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-bold text-neutral-600 capitalize">
+              {data.condition}
+            </span>
           </div>
-          <p className="text-sm text-neutral-500 mt-0.5">By {equipment.provider}</p>
-          <div className="mt-1">
-            <Rating rating={equipment.rating} reviewCount={equipment.reviewCount} />
-          </div>
+          <p className="text-xs text-neutral-500 mt-0.5 font-medium">Provided by {data.provider}</p>
         </div>
       </div>
 
-      <div className="mt-4 mb-4 flex flex-wrap gap-2 text-xs">
-        {equipment.deliveryAvailable && (
-          <span className="inline-flex items-center font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
-            Delivery available
+      <div className="mt-4 mb-3 flex flex-wrap gap-2 text-xs">
+        {data.delivery && (
+          <span className="inline-flex items-center gap-1 font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60 text-[11px]">
+            <Truck size={12} /> Doorstep Delivery
           </span>
         )}
-        {equipment.installationIncluded && (
-          <span className="inline-flex items-center gap-1 font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
-            <ShieldCheck size={12}/> Installation included
-          </span>
-        )}
+        <span className="inline-flex items-center gap-1 font-semibold text-blue-800 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200/60 text-[11px]">
+          <ShieldCheck size={12}/> Verified Sanitized
+        </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 border-t border-neutral-100 pt-4 mt-4">
-        <div className="flex flex-col justify-center">
-          <AvailabilityBadge status={equipment.availability} />
+      <div className="grid grid-cols-2 gap-3 border-t border-neutral-100 pt-3.5 mt-2 items-center">
+        <div>
+          <AvailabilityBadge status={data.availability} />
         </div>
         <div className="text-right">
-           <PriceDisplay price={equipment.pricePerDay} label="Rental" size="sm" period="day" />
+          <PriceDisplay price={data.rentalPriceDay} label="Rental" size="sm" period="day" />
         </div>
       </div>
     </Link>
   );
 }
+

@@ -577,7 +577,7 @@ export function HomePage() {
                       <div className="flex items-center gap-2 mt-1.5">
                         <Rating rating={doctor.rating} reviewCount={doctor.reviewCount} />
                         <span className="text-[10px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
-                          {doctor.experienceYears}y exp
+                          {doctor.experience}y exp
                         </span>
                       </div>
                     </div>

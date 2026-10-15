@@ -1,7 +1,11 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout';
+import { AuthProvider } from '@/context/AuthContext';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
+const LoginPage = lazy(() => import('@/pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const SignupPage = lazy(() => import('@/pages/SignupPage').then(m => ({ default: m.SignupPage })));
 const HomePage = lazy(() => import('@/pages/HomePage').then(m => ({ default: m.HomePage })));
 const ExplorePage = lazy(() => import('@/pages/ExplorePage').then(m => ({ default: m.ExplorePage })));
 const SearchPage = lazy(() => import('@/pages/SearchPage').then(m => ({ default: m.SearchPage })));
@@ -35,43 +39,53 @@ const MedicationsPage = lazy(() => import('@/pages/MedicationsPage').then(m => (
 function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<div className="flex h-screen items-center justify-center text-primary-600">Loading...</div>}>
-        <Routes>
-          <Route element={<AppLayout />}>
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/explore" element={<ExplorePage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/home-care" element={<HomeCarePage />} />
-            <Route path="/home-care/provider/:id" element={<ProviderDetailPage />} />
-            <Route path="/home-care/provider/:id/book" element={<HomeCareBookingPage />} />
-            <Route path="/doctors" element={<DoctorsPage />} />
-            <Route path="/doctors/:id" element={<DoctorDetailPage />} />
-            <Route path="/doctors/:id/book" element={<DoctorBookingPage />} />
-            <Route path="/telemedicine/:id" element={<TelemedicinePage />} />
-            <Route path="/telemedicine/:id/prescription" element={<DoctorPrescriptionPage />} />
-            <Route path="/prescription-view/:id" element={<PrescriptionViewPage />} />
-            <Route path="/prescription-cart/:id" element={<PrescriptionCartPage />} />
-            <Route path="/labs" element={<LabsPage />} />
-            <Route path="/labs/:id" element={<LabDetailPage />} />
-            <Route path="/labs/:id/book/:testId" element={<LabBookingPage />} />
-            <Route path="/pharmacies" element={<PharmaciesPage />} />
-            <Route path="/medications" element={<MedicationsPage />} />
-            <Route path="/equipment" element={<EquipmentPage />} />
-            <Route path="/equipment/:id" element={<EquipmentDetailPage />} />
-            <Route path="/equipment/:id/book" element={<EquipmentBookingPage />} />
-            <Route path="/care" element={<CarePage />} />
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/orders/:id" element={<OrderDetailPage />} />
-            <Route path="/health-records" element={<HealthRecordsPage />} />
-            <Route path="/health-records/:id" element={<DocumentViewPage />} />
-            <Route path="/family" element={<FamilyPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-            <Route path="/" element={<Navigate to="/home" replace />} />
-            <Route path="*" element={<Navigate to="/home" replace />} />
-          </Route>
-        </Routes>
-      </Suspense>
+      <AuthProvider>
+        <Suspense fallback={<div className="flex h-screen items-center justify-center font-medium text-emerald-600">Loading CareWell...</div>}>
+          <Routes>
+            {/* Standalone Authentication Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+
+            {/* Core Application Layout */}
+            <Route element={<AppLayout />}>
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/explore" element={<ExplorePage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/home-care" element={<HomeCarePage />} />
+              <Route path="/home-care/provider/:id" element={<ProviderDetailPage />} />
+              <Route path="/home-care/provider/:id/book" element={<HomeCareBookingPage />} />
+              <Route path="/doctors" element={<DoctorsPage />} />
+              <Route path="/doctors/:id" element={<DoctorDetailPage />} />
+              <Route path="/doctors/:id/book" element={<DoctorBookingPage />} />
+              <Route path="/telemedicine/:id" element={<TelemedicinePage />} />
+              <Route path="/telemedicine/:id/prescription" element={<DoctorPrescriptionPage />} />
+              <Route path="/prescription-view/:id" element={<PrescriptionViewPage />} />
+              <Route path="/prescription-cart/:id" element={<PrescriptionCartPage />} />
+              <Route path="/labs" element={<LabsPage />} />
+              <Route path="/labs/:id" element={<LabDetailPage />} />
+              <Route path="/labs/:id/book/:testId" element={<LabBookingPage />} />
+              <Route path="/pharmacies" element={<PharmaciesPage />} />
+              <Route path="/medications" element={<MedicationsPage />} />
+              <Route path="/equipment" element={<EquipmentPage />} />
+              <Route path="/equipment/:id" element={<EquipmentDetailPage />} />
+              <Route path="/equipment/:id/book" element={<EquipmentBookingPage />} />
+              
+              {/* Protected Clinical & Account Routes */}
+              <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
+              <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+              <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
+              <Route path="/health-records" element={<ProtectedRoute><HealthRecordsPage /></ProtectedRoute>} />
+              <Route path="/health-records/:id" element={<ProtectedRoute><DocumentViewPage /></ProtectedRoute>} />
+              <Route path="/family" element={<ProtectedRoute><FamilyPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+
+              <Route path="/" element={<Navigate to="/home" replace />} />
+              <Route path="*" element={<Navigate to="/home" replace />} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

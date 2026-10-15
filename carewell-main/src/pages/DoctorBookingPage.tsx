@@ -5,6 +5,8 @@ import { dataService } from '@/services/dataService';
 import { EmptyState } from '@/components/ui';
 import { CheckCircle2, User, Calendar, Clock, ArrowRight, CheckCircle, Video, Phone, MessageSquare } from 'lucide-react';
 
+import { PaymentModal, type PaymentDetails, type PaymentReceipt } from '@/components/ui';
+
 export function DoctorBookingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ export function DoctorBookingPage() {
   const [time, setTime] = useState('');
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [newOrderId, setNewOrderId] = useState('');
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
 
   if (!doctor) {
     return (
@@ -31,23 +34,34 @@ export function DoctorBookingPage() {
   const handleNext = () => setStep(s => s + 1);
   const handleBack = () => setStep(s => s - 1);
 
-  const handleConfirm = () => {
+  const handleInitiatePayment = () => {
     const selectedPatient = patients.find(p => p.id === patientId);
     const orderId = `tele-${Date.now()}`;
-    
-    // Add to mock persistence
-    dataService.orders.addOrder({
-      id: orderId,
-      type: 'doctor',
-      title: `Consultation with ${doctor.name}`,
-      status: 'upcoming',
-      amount: doctor.consultationFee,
-      date: date,
-      details: `${consultType} Consultation for ${selectedPatient?.name} at ${time}`,
-    });
 
-    setNewOrderId(orderId);
-    setIsConfirmed(true);
+    setPaymentDetails({
+      bookingId: orderId,
+      title: `Consultation with ${doctor.name}`,
+      serviceType: 'doctor',
+      patientName: selectedPatient?.name || 'Patient',
+      amount: doctor.consultationFee,
+      date,
+      timeSlot: time,
+      providerName: doctor.name,
+      onSuccess: (receipt: PaymentReceipt) => {
+        dataService.orders.addOrder({
+          id: orderId,
+          type: 'doctor',
+          title: `Consultation with ${doctor.name}`,
+          status: 'upcoming',
+          amount: receipt.totalAmount,
+          date: date || new Date().toISOString().split('T')[0],
+          details: `${consultType} Consultation for ${selectedPatient?.name} at ${time}. Paid via ${receipt.method} (Invoice: ${receipt.receiptId})`,
+        });
+        setNewOrderId(orderId);
+        setIsConfirmed(true);
+      },
+      onClose: () => setPaymentDetails(null),
+    });
   };
 
   const renderProgress = () => (
@@ -255,15 +269,20 @@ export function DoctorBookingPage() {
               </div>
 
               <button 
-                onClick={handleConfirm}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-600 py-3.5 font-bold text-white shadow-sm hover:bg-primary-700 transition-colors"
+                onClick={handleInitiatePayment}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 font-bold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition active:scale-[0.99]"
               >
-                Confirm Appointment
+                Proceed to Payment & Confirm (₹{doctor.consultationFee})
               </button>
             </div>
           )}
         </div>
       </div>
+
+      <PaymentModal
+        isOpen={!!paymentDetails}
+        details={paymentDetails}
+      />
     </div>
   );
 }

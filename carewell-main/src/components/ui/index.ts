@@ -24,4 +24,6 @@ export { FilterPanel } from './FilterPanel';
 export * from './SearchFilters';
 export { HeeraChat } from './HeeraChat';
 export { LocationModal } from './LocationModal';
-
+export { PaymentModal } from './PaymentModal';
+export { SosEmergencyModal } from './SosEmergencyModal';
+export { UploadRecordModal } from './UploadRecordModal';

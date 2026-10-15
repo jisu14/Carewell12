@@ -17,18 +17,56 @@ const recordTypeConfig: Record<HealthRecord['type'], { icon: React.ReactNode; la
   other: { icon: <FileText size={18} />, label: 'Other', color: 'bg-neutral-100 text-neutral-600' },
 };
 
+import { UploadRecordModal } from '@/components/ui';
+import { UploadCloud, Plus } from 'lucide-react';
+
 const tabs = ['all', 'prescription', 'lab-report', 'consultation', 'document', 'medication', 'diagnosis', 'vaccination'] as const;
 
 export function HealthRecordsPage() {
-  const records = dataService.healthRecords.getAll();
+  const [records, setRecords] = useState(dataService.healthRecords.getAll());
   const [activeTab, setActiveTab] = useState<typeof tabs[number]>('all');
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+
+  const refreshRecords = () => {
+    setRecords([...dataService.healthRecords.getAll()]);
+  };
 
   const filtered = activeTab === 'all' ? records : records.filter((r) => r.type === activeTab);
 
   return (
     <div className="pb-20 lg:pb-8">
-      <AppHeader title="Health Records" showBack />
+      <AppHeader
+        title="Health Records"
+        showBack
+        rightAction={
+          <button
+            type="button"
+            onClick={() => setIsUploadOpen(true)}
+            className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition active:scale-95"
+          >
+            <Plus size={15} />
+            <span className="hidden sm:inline">Upload Record</span>
+            <span className="sm:hidden">Upload</span>
+          </button>
+        }
+      />
       <div className="mx-auto max-w-6xl px-4 py-4 lg:px-8">
+        {/* Action Banner for Vault */}
+        <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white p-4 border border-emerald-100">
+          <div>
+            <h2 className="text-sm font-bold text-emerald-950">Encrypted Family Health Vault</h2>
+            <p className="text-xs text-emerald-800/80">Store, view, and share prescriptions, lab reports, and clinical documents securely.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsUploadOpen(true)}
+            className="flex items-center gap-2 rounded-xl bg-white border border-emerald-200 px-3.5 py-2 text-xs font-bold text-emerald-700 shadow-xs hover:bg-emerald-50 transition shrink-0"
+          >
+            <UploadCloud size={15} className="text-emerald-600" />
+            <span>Upload Document</span>
+          </button>
+        </div>
+
         {/* Tabs */}
         <div className="mb-4 flex gap-2 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => (
@@ -90,9 +128,19 @@ export function HealthRecordsPage() {
             })}
           </div>
         ) : (
-          <EmptyState icon={<FileText size={28} />} title="No records found" description="Health records will appear here as they are added" />
+          <EmptyState 
+            icon={<FileText size={28} />} 
+            title="No records found" 
+            description="Upload prescriptions, lab reports, and vaccination cards to keep your medical history organized."
+          />
         )}
       </div>
+
+      <UploadRecordModal
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+        onRecordAdded={refreshRecords}
+      />
     </div>
   );
 }

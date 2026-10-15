@@ -61,6 +61,20 @@ export function AppHeader({ title, subtitle, showBack, showLogo, showSearch = fa
             </Link>
           )}
 
+          {/* Emergency SOS Quick Trigger */}
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('carewell:open_sos'))}
+            className="flex items-center gap-1.5 rounded-xl border border-red-200/80 bg-red-50/90 hover:bg-red-100 text-red-600 px-2.5 py-1.5 text-xs font-bold transition active:scale-95 shadow-2xs"
+            title="Instant SOS Emergency Dispatch"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
+            </span>
+            <span className="tracking-tight">SOS</span>
+          </button>
+
           {rightAction}
 
           {!rightAction && (

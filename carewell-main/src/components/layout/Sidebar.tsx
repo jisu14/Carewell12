@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Compass, Heart, Package, User, Bell, Search, ShieldCheck, HeartPulse, Sparkles, PhoneCall, MapPin, ChevronRight } from 'lucide-react';
+import { Home, Compass, Heart, Package, User, Bell, Search, ShieldCheck, HeartPulse, Sparkles, PhoneCall, MapPin, ChevronRight, AlertTriangle } from 'lucide-react';
 import { dataService } from '@/services/dataService';
 import { locationService, type UserLocation } from '@/services/locationService';
 import { LocationModal } from '@/components/ui/LocationModal';
@@ -160,13 +160,23 @@ export function Sidebar() {
           </div>
           <p className="text-xs font-bold tracking-tight text-white">Emergency Response</p>
           <p className="text-[10px] text-neutral-400 mt-0.5">Priority ambulance & nurse dispatch</p>
-          <a
-            href="tel:+919847012345"
-            className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 py-1.5 px-3 text-[11px] font-bold text-white transition-colors shadow-xs"
-          >
-            <PhoneCall size={12} />
-            <span>Call Concierge</span>
-          </a>
+          <div className="flex gap-2 mt-3">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('carewell:open_sos'))}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-500 active:bg-red-700 py-1.5 px-2.5 text-[11px] font-bold text-white transition-colors shadow-xs"
+            >
+              <AlertTriangle size={12} />
+              <span>SOS Action</span>
+            </button>
+            <a
+              href="tel:+919847012345"
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 py-1.5 px-2.5 text-[11px] font-bold text-white transition-colors shadow-xs"
+            >
+              <PhoneCall size={12} />
+              <span>Concierge</span>
+            </a>
+          </div>
         </div>
       </div>
 

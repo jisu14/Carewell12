@@ -1,120 +1,320 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Paperclip, FileText, Activity, Speaker } from 'lucide-react';
+import { 
+  Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, 
+  Paperclip, Send, HeartPulse, Activity, ShieldCheck, 
+  Volume2, VolumeX, Sparkles, User
+} from 'lucide-react';
 import { dataService } from '@/services/dataService';
 
 export function TelemedicinePage() {
-  const { id } = useParams(); // mock order id
+  const { id } = useParams();
   const navigate = useNavigate();
   const order = dataService.orders.getById(id || '');
 
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
+  const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [secondsElapsed, setSecondsElapsed] = useState(134);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    { sender: 'doctor', text: 'Hello! I am reviewing your blood pressure readings and current symptoms.', time: '10:02 AM' },
+    { sender: 'patient', text: 'Good morning Doctor. The morning readings have been slightly elevated around 135/88.', time: '10:03 AM' },
+    { sender: 'doctor', text: 'Understood. Let us review your salt intake and current dosage of Telmisartan.', time: '10:04 AM' },
+  ]);
 
-  // Extract doctor name from order title (format: "Consultation with Dr. Name")
-  const doctorName = order?.title.replace('Consultation with ', '') || 'Doctor';
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Extract doctor name from order title
+  const doctorName = order?.title.replace('Consultation with ', '') || 'Dr. Ramesh Menon';
+
+  // Elapsed timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSecondsElapsed((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Attempt real camera stream
+  useEffect(() => {
+    let stream: MediaStream | null = null;
+    if (!isVideoOff && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: false })
+        .then((s) => {
+          stream = s;
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = s;
+            setCameraActive(true);
+          }
+        })
+        .catch(() => {
+          setCameraActive(false);
+        });
+    }
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [isVideoOff]);
+
+  const formatTimer = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    const newMsg = {
+      sender: 'patient',
+      text: chatInput.trim(),
+      time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setChatMessages((prev) => [...prev, newMsg]);
+    setChatInput('');
+
+    // Simulated doctor response
+    setTimeout(() => {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          sender: 'doctor',
+          text: 'Noted. I am formulating your updated digital prescription now.',
+          time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
+    }, 1500);
+  };
 
   const endCall = () => {
-    // Navigate to prescription page as doctor perspective, or just an end screen.
-    // Assuming we want to show the prescription interface next since it's a demo.
     navigate(`/telemedicine/${id}/prescription`);
   };
 
   return (
-    <div className="flex h-screen w-full flex-col bg-neutral-900 text-white sm:flex-row">
+    <div className="flex h-screen w-full flex-col bg-slate-950 text-white sm:flex-row overflow-hidden font-sans">
       {/* Video Area */}
-      <div className="relative flex flex-1 flex-col p-4">
-        {/* Header */}
-        <div className="absolute left-6 top-6 z-10 rounded-xl bg-black/40 px-4 py-2 backdrop-blur-md">
-          <h2 className="font-semibold text-white">{doctorName}</h2>
-          <p className="text-xs text-neutral-300">04:23</p>
-        </div>
+      <div className="relative flex flex-1 flex-col p-3 sm:p-4 bg-slate-950 justify-between">
+        {/* Header HUD */}
+        <div className="z-10 flex items-center justify-between gap-3 rounded-2xl bg-slate-900/80 px-4 py-2.5 backdrop-blur-md border border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold shadow-xs">
+              {doctorName.charAt(0)}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-white">{doctorName}</h2>
+                <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Encrypted HD
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">Cardiology &bull; Teleconsultation</p>
+            </div>
+          </div>
 
-        {/* Main Video (Doctor) */}
-        <div className="relative h-full w-full overflow-hidden rounded-3xl bg-neutral-800">
-          <div className="flex h-full w-full items-center justify-center text-neutral-600">
-            <span className="text-lg">Doctor Video Feed Placeholder</span>
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3 text-xs text-slate-300 font-mono bg-slate-800/60 px-3 py-1.5 rounded-xl border border-slate-700/50">
+              <span className="flex items-center gap-1 text-emerald-400">
+                <HeartPulse size={14} /> 74 bpm
+              </span>
+              <span>&bull;</span>
+              <span className="flex items-center gap-1 text-cyan-400">
+                <Activity size={14} /> 99% SpO2
+              </span>
+            </div>
+            <div className="font-mono text-xs font-bold bg-red-600/20 border border-red-500/30 text-red-300 px-2.5 py-1 rounded-xl">
+              {formatTimer(secondsElapsed)}
+            </div>
           </div>
         </div>
 
-        {/* PIP Video (Patient) */}
-        <div className="absolute bottom-28 right-8 h-48 w-32 overflow-hidden rounded-2xl bg-neutral-700 shadow-2xl ring-4 ring-neutral-900 sm:bottom-8 sm:h-40 sm:w-28">
-          {isVideoOff ? (
-            <div className="flex h-full w-full items-center justify-center bg-neutral-800">
-              <VideoOff className="text-neutral-500" />
+        {/* Main Video View (Doctor Stream) */}
+        <div className="relative flex-1 my-3 overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 flex items-center justify-center">
+          {/* Doctor Video Canvas Simulation */}
+          <div className="relative w-full h-full flex flex-col items-center justify-center">
+            {/* Visual avatar backdrop with ambient lighting */}
+            <div className="absolute inset-0 bg-radial from-emerald-900/20 via-transparent to-transparent pointer-events-none" />
+            
+            <div className="relative flex flex-col items-center text-center p-6">
+              <div className="relative">
+                <div className="h-32 w-32 rounded-3xl bg-gradient-to-tr from-emerald-600 via-teal-700 to-slate-800 flex items-center justify-center text-5xl font-black text-white shadow-2xl ring-4 ring-emerald-500/30">
+                  {doctorName.replace('Dr. ', '').charAt(0)}
+                </div>
+                <div className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-md">
+                  <ShieldCheck size={18} />
+                </div>
+              </div>
+
+              <h3 className="mt-4 text-lg font-bold text-white">{doctorName}</h3>
+              <p className="text-xs text-emerald-400 font-medium">Listening to Patient History...</p>
+
+              {/* Animated audio wave */}
+              <div className="flex items-center gap-1 mt-4">
+                {[4, 12, 8, 16, 10, 6, 14, 10, 5].map((h, i) => (
+                  <div
+                    key={i}
+                    style={{ height: `${h * 1.5}px` }}
+                    className="w-1 bg-emerald-400 rounded-full animate-pulse"
+                  />
+                ))}
+              </div>
             </div>
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs text-neutral-500">
+          </div>
+
+          {/* PIP Video (Patient Camera View) */}
+          <div className="absolute bottom-4 right-4 h-44 w-32 overflow-hidden rounded-2xl bg-slate-800 shadow-2xl ring-2 ring-slate-700/80 sm:bottom-6 sm:right-6 sm:h-48 sm:w-36">
+            {isVideoOff ? (
+              <div className="flex h-full w-full flex-col items-center justify-center bg-slate-900 p-2 text-center text-slate-500">
+                <VideoOff size={22} />
+                <span className="text-[10px] mt-1">Camera Paused</span>
+              </div>
+            ) : cameraActive ? (
+              <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="h-full w-full object-cover transform -scale-x-100"
+              />
+            ) : (
+              <div className="flex h-full w-full flex-col items-center justify-center bg-slate-900 p-2 text-center text-slate-400">
+                <div className="h-12 w-12 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 font-bold mb-1">
+                  You
+                </div>
+                <span className="text-[10px] text-emerald-400 font-semibold">Self Preview</span>
+              </div>
+            )}
+            <div className="absolute bottom-1.5 left-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[9px] font-bold text-white">
               You
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Controls */}
-        <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-4 rounded-full bg-neutral-800/80 px-6 py-3 backdrop-blur-lg">
-          <button 
+        {/* Floating Controls Bar */}
+        <div className="z-10 flex items-center justify-center gap-3 rounded-2xl bg-slate-900/90 p-3 backdrop-blur-xl border border-slate-800 self-center">
+          <button
+            type="button"
             onClick={() => setIsMuted(!isMuted)}
-            className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${isMuted ? 'bg-error-500 text-white' : 'bg-neutral-700 hover:bg-neutral-600'}`}
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl transition ${
+              isMuted ? 'bg-red-600 text-white shadow-lg shadow-red-600/30' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+            }`}
+            title={isMuted ? 'Unmute Microphone' : 'Mute Microphone'}
           >
             {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
           </button>
-          
-          <button 
+
+          <button
+            type="button"
             onClick={() => setIsVideoOff(!isVideoOff)}
-            className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${isVideoOff ? 'bg-error-500 text-white' : 'bg-neutral-700 hover:bg-neutral-600'}`}
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl transition ${
+              isVideoOff ? 'bg-red-600 text-white shadow-lg shadow-red-600/30' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+            }`}
+            title={isVideoOff ? 'Start Camera' : 'Pause Camera'}
           >
             {isVideoOff ? <VideoOff size={20} /> : <Video size={20} />}
           </button>
 
-          <button className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-700 hover:bg-neutral-600 transition-colors">
-            <Speaker size={20} />
+          <button
+            type="button"
+            onClick={() => setIsSpeakerMuted(!isSpeakerMuted)}
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl transition ${
+              isSpeakerMuted ? 'bg-slate-700 text-amber-400' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+            }`}
+            title="Speaker Volume"
+          >
+            {isSpeakerMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </button>
-          
-          <button 
+
+          <button
+            type="button"
             onClick={() => setShowChat(!showChat)}
-            className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors sm:hidden ${showChat ? 'bg-primary-600' : 'bg-neutral-700'}`}
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl transition ${
+              showChat ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+            }`}
+            title="Toggle Clinical Chat"
           >
             <MessageSquare size={20} />
           </button>
 
-          <button onClick={endCall} className="flex h-12 w-12 items-center justify-center rounded-full bg-error-500 hover:bg-error-600 transition-colors ml-4">
-            <PhoneOff size={20} />
+          <button
+            type="button"
+            onClick={endCall}
+            className="flex items-center gap-2 rounded-2xl bg-red-600 px-5 py-3 font-bold text-white shadow-lg shadow-red-600/30 hover:bg-red-700 transition active:scale-95 ml-2"
+          >
+            <PhoneOff size={18} />
+            <span className="text-xs">End & Prescribe</span>
           </button>
         </div>
       </div>
 
-      {/* Side Panel (Chat / Records) */}
-      <div className={`${showChat ? 'flex' : 'hidden'} w-full flex-col border-l border-neutral-800 bg-neutral-900 sm:flex sm:w-80 lg:w-96`}>
-        {/* Tabs */}
-        <div className="flex border-b border-neutral-800 p-2">
-          <button className="flex-1 rounded-lg bg-neutral-800 py-2 text-sm font-semibold text-white">Chat</button>
-          <button className="flex-1 rounded-lg py-2 text-sm font-medium text-neutral-400 hover:text-white transition-colors">Records</button>
+      {/* Side Panel: Live Consultation Chat */}
+      <div className={`${showChat ? 'flex' : 'hidden'} w-full flex-col border-l border-slate-800 bg-slate-900 sm:flex sm:w-80 lg:w-96`}>
+        <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3.5">
+          <div className="flex items-center gap-2">
+            <MessageSquare size={16} className="text-emerald-500" />
+            <h4 className="text-xs font-bold text-white">Consultation Messaging</h4>
+          </div>
+          <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[9px] font-bold text-emerald-400">
+            Secure Channel
+          </span>
         </div>
 
-        {/* Chat Area */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-4">
-          <div className="rounded-xl rounded-tl-none bg-neutral-800 p-3 text-sm max-w-[85%]">
-            Hello, please share your previous prescription if you have it.
-          </div>
-          <div className="rounded-xl rounded-tr-none bg-primary-600 p-3 text-sm max-w-[85%] self-end ml-auto">
-            Sure doctor, uploading it now.
-          </div>
+        {/* Message Log */}
+        <div className="flex-1 p-4 overflow-y-auto space-y-3 font-sans">
+          {chatMessages.map((msg, i) => (
+            <div
+              key={i}
+              className={`flex flex-col max-w-[85%] ${msg.sender === 'patient' ? 'ml-auto items-end' : 'items-start'}`}
+            >
+              <div
+                className={`rounded-2xl p-3 text-xs leading-relaxed ${
+                  msg.sender === 'patient'
+                    ? 'bg-emerald-600 text-white rounded-tr-none'
+                    : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700'
+                }`}
+              >
+                {msg.text}
+              </div>
+              <span className="text-[10px] text-slate-500 mt-1 px-1">{msg.time}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Input */}
-        <div className="border-t border-neutral-800 p-4">
-          <div className="flex items-center gap-2 rounded-xl bg-neutral-800 p-2">
-            <button className="p-2 text-neutral-400 hover:text-white transition-colors">
-              <Paperclip size={20} />
+        {/* Chat Input */}
+        <form onSubmit={handleSendMessage} className="border-t border-slate-800 p-3 bg-slate-900/90">
+          <div className="flex items-center gap-2 rounded-2xl bg-slate-800 p-1.5 border border-slate-700">
+            <button
+              type="button"
+              className="p-2 text-slate-400 hover:text-white transition"
+              title="Attach Report"
+            >
+              <Paperclip size={16} />
             </button>
-            <input 
-              type="text" 
-              placeholder="Type a message..." 
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-neutral-500"
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              placeholder="Ask doctor or share symptoms..."
+              className="flex-1 bg-transparent text-xs text-white outline-none placeholder:text-slate-500"
             />
+            <button
+              type="submit"
+              disabled={!chatInput.trim()}
+              className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition disabled:opacity-40"
+            >
+              <Send size={14} />
+            </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

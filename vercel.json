@@ -1,0 +1,12 @@
+{
+  "buildCommand": "cd carewell-main && npm install && npm run build",
+  "outputDirectory": "carewell-main/dist",
+  "framework": "vite",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

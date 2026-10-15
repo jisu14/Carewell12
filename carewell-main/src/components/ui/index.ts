@@ -23,3 +23,5 @@ export { BottomSheet } from './BottomSheet';
 export { FilterPanel } from './FilterPanel';
 export * from './SearchFilters';
 export { HeeraChat } from './HeeraChat';
+export { LocationModal } from './LocationModal';
+

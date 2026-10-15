@@ -1,12 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Bell, MapPin, Search, ChevronRight, Stethoscope, FlaskConical, Pill, Heart, FileText, ArrowRight,
   ShieldCheck, Calendar, Activity, Sparkles, Clock, CheckCircle2, PhoneCall, AlertCircle, 
-  HeartPulse, User, Award, Video, Check
+  HeartPulse, User, Award, Video, Check, ChevronDown, Navigation
 } from 'lucide-react';
 import { dataService } from '@/services/dataService';
-import { PatientSelector, Rating, VerificationBadge, PriceDisplay } from '@/components/ui';
+import { locationService, type UserLocation } from '@/services/locationService';
+import { PatientSelector, Rating, VerificationBadge, PriceDisplay, LocationModal } from '@/components/ui';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -14,6 +15,16 @@ export function HomePage() {
   const allPatients = dataService.patients.getAll();
   const [selectedPatientId, setSelectedPatientId] = useState(allPatients[1]?.id ?? allPatients[0].id);
   const selectedPatient = allPatients.find(p => p.id === selectedPatientId);
+
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [activeLocation, setActiveLocation] = useState<UserLocation>(locationService.getLocation());
+
+  useEffect(() => {
+    const unsub = locationService.subscribe((loc) => {
+      setActiveLocation(loc);
+    });
+    return unsub;
+  }, []);
 
   const providers = dataService.providers.getAll();
   const doctors = dataService.doctors.getAll();
@@ -110,11 +121,16 @@ export function HomePage() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-neutral-600 bg-white/90 px-3 py-1.5 rounded-full border border-neutral-200/80 shadow-2xs">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-              <MapPin size={13} className="text-emerald-700" />
-              <span>{user.location}</span>
-            </div>
+            <button
+              onClick={() => setIsLocationModalOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-semibold text-neutral-700 hover:text-neutral-950 bg-white/95 hover:bg-white px-3 py-1.5 rounded-full border border-neutral-200/80 hover:border-emerald-500/50 shadow-2xs transition-all active:scale-95 group"
+              title="Click to detect GPS or change healthcare location"
+            >
+              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <MapPin size={13} className="text-emerald-700 group-hover:scale-110 transition-transform" />
+              <span className="max-w-[110px] sm:max-w-[170px] truncate">{activeLocation.displayName}</span>
+              <ChevronDown size={12} className="text-neutral-400 group-hover:text-emerald-700 transition-colors" />
+            </button>
 
             <a
               href="tel:+919847012345"
@@ -665,6 +681,12 @@ export function HomePage() {
         </section>
 
       </main>
+
+      {/* Real-time Location Selection & GPS Geolocation Modal */}
+      <LocationModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+      />
     </div>
   );
 }

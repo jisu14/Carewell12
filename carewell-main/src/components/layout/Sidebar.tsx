@@ -1,6 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Compass, Heart, Package, User, Bell, Search, ShieldCheck, HeartPulse, Sparkles, PhoneCall } from 'lucide-react';
+import { Home, Compass, Heart, Package, User, Bell, Search, ShieldCheck, HeartPulse, Sparkles, PhoneCall, MapPin, ChevronRight } from 'lucide-react';
 import { dataService } from '@/services/dataService';
+import { locationService, type UserLocation } from '@/services/locationService';
+import { LocationModal } from '@/components/ui/LocationModal';
 
 const navItems = [
   { label: 'Home Dashboard', icon: Home, path: '/home' },
@@ -12,39 +15,74 @@ const navItems = [
 
 export function Sidebar() {
   const location = useLocation();
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [activeLocation, setActiveLocation] = useState<UserLocation>(locationService.getLocation());
+
+  useEffect(() => {
+    const unsub = locationService.subscribe((loc) => {
+      setActiveLocation(loc);
+    });
+    return unsub;
+  }, []);
+
   const unreadCount = dataService.notifications.getUnreadCount();
   const activeOrdersCount = dataService.orders.getAll().filter(o => o.status === 'upcoming' || o.status === 'in-progress').length;
 
   return (
-    <aside className="hidden lg:flex fixed left-0 top-0 z-30 h-screen w-64 flex-col border-r border-neutral-200/70 bg-white/90 backdrop-blur-xl shadow-[4px_0_24px_-4px_rgba(15,23,42,0.03)]">
-      {/* Brand Header */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100/80">
-        <Link to="/home" className="flex items-center gap-3 group">
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-800 via-emerald-700 to-teal-600 text-white shadow-md shadow-emerald-900/15 ring-1 ring-white/40 group-hover:scale-105 transition-transform duration-300">
-            <HeartPulse size={20} className="text-emerald-100 animate-pulse" />
-            <span className="absolute -top-1 -right-1 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white"></span>
-            </span>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-base font-extrabold tracking-tight text-neutral-950 font-display">CareWell</span>
-              <span className="rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200/60 shadow-2xs">
-                PRO
+    <>
+      <aside className="hidden lg:flex fixed left-0 top-0 z-30 h-screen w-64 flex-col border-r border-neutral-200/70 bg-white/90 backdrop-blur-xl shadow-[4px_0_24px_-4px_rgba(15,23,42,0.03)]">
+        {/* Brand Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100/80">
+          <Link to="/home" className="flex items-center gap-3 group">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-800 via-emerald-700 to-teal-600 text-white shadow-md shadow-emerald-900/15 ring-1 ring-white/40 group-hover:scale-105 transition-transform duration-300">
+              <HeartPulse size={20} className="text-emerald-100 animate-pulse" />
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white"></span>
               </span>
             </div>
-            <p className="text-[11px] font-medium text-neutral-600">Premier Health Network</p>
-          </div>
-        </Link>
-      </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-extrabold tracking-tight text-neutral-950 font-display">CareWell</span>
+                <span className="rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200/60 shadow-2xs">
+                  PRO
+                </span>
+              </div>
+              <p className="text-[11px] font-medium text-neutral-600">Premier Health Network</p>
+            </div>
+          </Link>
+        </div>
 
-      {/* Main Navigation */}
-      <div className="px-4 pt-5 pb-2">
-        <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-neutral-600">
-          Main Navigation
-        </span>
-      </div>
+        {/* Location Selector Pill */}
+        <div className="px-4 pt-3 pb-1">
+          <button
+            onClick={() => setIsLocationModalOpen(true)}
+            className="group flex w-full items-center justify-between gap-2 rounded-2xl bg-gradient-to-br from-emerald-50/70 to-teal-50/40 hover:from-emerald-100/70 hover:to-teal-100/50 p-2.5 text-left border border-emerald-200/70 shadow-2xs transition-all active:scale-98"
+            title="Click to detect GPS or switch city"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-2xs">
+                <MapPin size={12} />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-[9px] font-bold uppercase tracking-wider text-emerald-800 leading-none">
+                  Location Zone
+                </span>
+                <span className="block text-xs font-extrabold text-neutral-900 truncate leading-tight mt-0.5">
+                  {activeLocation.displayName}
+                </span>
+              </div>
+            </div>
+            <ChevronRight size={13} className="text-emerald-700 group-hover:translate-x-0.5 transition-transform shrink-0" />
+          </button>
+        </div>
+
+        {/* Main Navigation */}
+        <div className="px-4 pt-3 pb-2">
+          <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-neutral-600">
+            Main Navigation
+          </span>
+        </div>
       <nav className="flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || (item.path === '/care' && location.pathname.startsWith('/care'));
@@ -140,11 +178,18 @@ export function Sidebar() {
           </div>
           <div className="text-[10px] leading-tight">
             <p className="font-bold text-neutral-800">NABH & HIPAA Compliant</p>
-            <p className="text-neutral-600">256-bit Encrypted Health Vault</p>
+            <p className="text-neutral-500">256-bit Encrypted Health Vault</p>
           </div>
         </div>
       </div>
     </aside>
+
+    <LocationModal
+      isOpen={isLocationModalOpen}
+      onClose={() => setIsLocationModalOpen(false)}
+    />
+  </>
   );
 }
+
 

@@ -1,0 +1,10 @@
+{
+  "name": "carewell-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix carewell-main run build",
+    "dev": "npm --prefix carewell-main run dev",
+    "typecheck": "npm --prefix carewell-main run typecheck"
+  }
+}

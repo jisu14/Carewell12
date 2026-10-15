@@ -12,15 +12,20 @@
   }
 
   body {
-    @apply bg-[#fbfcfb] text-neutral-800 font-sans antialiased selection:bg-primary-100 selection:text-primary-900;
+    @apply bg-[#f8faf9] text-neutral-900 font-sans antialiased selection:bg-primary-100 selection:text-primary-950;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(22, 163, 74, 0.035) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(13, 148, 136, 0.03) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(240, 24DF, 245, 0.4) 0px, transparent 50%);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight text-neutral-900;
-    letter-spacing: -0.02em;
+    @apply font-bold tracking-tight text-neutral-950;
+    letter-spacing: -0.025em;
   }
 }
 
@@ -39,6 +44,64 @@
   }
 
   .page-container-lg {
-    @apply mx-auto w-full max-w-6xl px-6;
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Luxury Glassmorphism Utilities */
+  .glass-card {
+    @apply bg-white/85 backdrop-blur-md border border-white/60 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06),0_1px_3px_0_rgba(15,23,42,0.04)];
+  }
+
+  .glass-card-hover {
+    @apply transition-all duration-300 hover:bg-white/95 hover:border-primary-500/30 hover:shadow-[0_12px_32px_-6px_rgba(15,23,42,0.1),0_4px_12px_-2px_rgba(22,163,74,0.08)] hover:-translate-y-1;
+  }
+
+  .glass-header {
+    @apply bg-white/80 backdrop-blur-xl border-b border-neutral-200/60 shadow-[0_2px_12px_-2px_rgba(15,23,42,0.04)];
+  }
+
+  .glass-nav {
+    @apply bg-white/85 backdrop-blur-xl border-t border-white/80 shadow-[0_-8px_24px_-4px_rgba(15,23,42,0.05)];
+  }
+
+  .luxury-gradient-dark {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #062f22 100%);
+  }
+
+  .luxury-gradient-emerald {
+    background: linear-gradient(135deg, #0d5f42 0%, #147a55 50%, #10b981 100%);
+  }
+
+  .luxury-gradient-teal {
+    background: linear-gradient(135deg, #044e54 0%, #0d9488 100%);
+  }
+
+  .luxury-gradient-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 249, 0.9) 100%);
+  }
+
+  .glow-emerald {
+    box-shadow: 0 0 20px -3px rgba(22, 163, 74, 0.25);
+  }
+
+  .glow-emerald-sm {
+    box-shadow: 0 0 10px -1px rgba(22, 163, 74, 0.3);
+  }
+
+  .badge-luxury {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide border;
   }
 }
+
+/* Subtle Shimmer Animation */
+@keyframes luxuryShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.luxury-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: luxuryShimmer 3s infinite;
+}
+
